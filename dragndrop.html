@@ -1,1 +1,81 @@
-<!DOCTYPE html><html lang="en"><head>    <meta charset="UTF-8">    <meta name="viewport" content="width=device-width, initial-scale=1.0">    <title>Matching Game</title>    <style>        body {            font-family: Arial, sans-serif;            display: flex;            flex-direction: column;            align-items: center;            justify-content: center;            height: 100vh;            margin: 0;            background-color: #f0f0f0;        }        .container {            display: flex;            gap: 20px;            flex-wrap: wrap;        }        .draggable, .dropzone {            width: 100px;            height: 100px;            background-color: #4CAF50;            color: white;            display: flex;            justify-content: center;            align-items: center;            cursor: grab;            margin: 10px;        }        .dropzone {            background-color: #ddd;            border: 2px dashed #aaa;        }    </style></head><body>    <h1>Matching Game</h1>    <div class="container">        <div class="draggable" draggable="true" id="drag1">1+1</div>        <div class="draggable" draggable="true" id="drag2">2+2</div>        <div class="dropzone" id="dropzone1">2</div>        <div class="dropzone" id="dropzone2">4</div>    </div>    <script>        const draggables = document.querySelectorAll('.draggable');        const dropzones = document.querySelectorAll('.dropzone');        draggables.forEach(draggable => {            draggable.addEventListener('dragstart', (e) => {                e.dataTransfer.setData('text/plain', e.target.id);            });        });        dropzones.forEach(dropzone => {            dropzone.addEventListener('dragover', (e) => {                e.preventDefault();            });            dropzone.addEventListener('drop', (e) => {                e.preventDefault();                const id = e.dataTransfer.getData('text');                const draggableElement = document.getElementById(id);                if ((id === 'drag1' && dropzone.id === 'dropzone1') || (id === 'drag2' && dropzone.id === 'dropzone2')) {                    dropzone.appendChild(draggableElement);                    dropzone.style.backgroundColor = '#4CAF50';                    dropzone.style.color = 'white';                } else {                    alert('Incorrect match! Try again.');                }            });        });    </script></body></html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matching Game</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+
+        .container {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .draggable, .dropzone {
+            width: 100px;
+            height: 100px;
+            background-color: #4CAF50;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: grab;
+            margin: 10px;
+        }
+
+        .dropzone {
+            background-color: #ddd;
+            border: 2px dashed #aaa;
+        }
+    </style>
+</head>
+<body>
+    <h1>Matching Game</h1>
+    <div class="container">
+        <div class="draggable" draggable="true" id="drag1">1+1</div>
+        <div class="draggable" draggable="true" id="drag2">2+2</div>
+        <div class="dropzone" id="dropzone1">2</div>
+        <div class="dropzone" id="dropzone2">4</div>
+    </div>
+    <script>
+        const draggables = document.querySelectorAll('.draggable');
+        const dropzones = document.querySelectorAll('.dropzone');
+
+        draggables.forEach(draggable => {
+            draggable.addEventListener('dragstart', (e) => {
+                e.dataTransfer.setData('text/plain', e.target.id);
+            });
+        });
+
+        dropzones.forEach(dropzone => {
+            dropzone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+            });
+
+            dropzone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                const id = e.dataTransfer.getData('text');
+                const draggableElement = document.getElementById(id);
+                if ((id === 'drag1' && dropzone.id === 'dropzone1') || (id === 'drag2' && dropzone.id === 'dropzone2')) {
+                    dropzone.appendChild(draggableElement);
+                    dropzone.style.backgroundColor = '#4CAF50';
+                    dropzone.style.color = 'white';
+                } else {
+                    alert('Incorrect match! Try again.');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
