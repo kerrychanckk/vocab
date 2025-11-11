@@ -1,0 +1,255 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Animal Flashcards</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Load Inter font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6; /* bg-gray-100 */
+        }
+        
+        /* This container enables the 3D flip */
+        .flashcard-container {
+            perspective: 1000px;
+        }
+
+        /* The card itself, which will flip */
+        .flashcard {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+            cursor: pointer;
+        }
+
+        /* The flipped state */
+        .flashcard.is-flipped {
+            transform: rotateY(180deg);
+        }
+
+        /* Both faces of the card */
+        .card-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 1rem; /* rounded-xl */
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* shadow-lg */
+            overflow: hidden;
+        }
+
+        /* The front (image side) */
+        .card-front {
+            background-color: #e5e7eb; /* bg-gray-200 */
+            /* No rotation, this is the default state */
+        }
+        
+        .card-front img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* Ensures image covers the card */
+        }
+
+        /* The back (word side) */
+        .card-back {
+            background-color: #4f46e5; /* bg-indigo-600 */
+            color: white;
+            transform: rotateY(180deg); /* Hidden by default */
+        }
+        
+        /* Style for disabled buttons */
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4">
+
+    <div class="w-full max-w-md mx-auto">
+        <h1 class="text-3xl sm:text-4xl font-bold text-indigo-600 mb-6 text-center">Animal Flashcards</h1>
+        
+        <!-- Flashcard container -->
+        <div class="flashcard-container w-full aspect-video sm:aspect-square mb-6">
+            <div id="flashcard" class="flashcard">
+                <!-- Front of Card (Image) -->
+                <div class="card-face card-front">
+                    <img id="card-image" src="" alt="Animal picture">
+                </div>
+                <!-- Back of Card (Word) -->
+                <div class="card-face card-back flex-col"> <!-- <-- Added flex-col -->
+                    <h2 id="card-word" class="text-3xl sm:text-4xl font-bold">Word</h2>
+                    <!-- Pronunciation Button -->
+                    <button id="speak-btn" class="mt-4 p-3 rounded-full hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-indigo-600 transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.858 15H3a1 1 0 01-1-1V10a1 1 0 011-1h2.858l4.586-4.586a1 1 0 011.707.707V18.879a1 1 0 01-1.707.707L5.858 15z" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Progress Indicator -->
+        <p id="progress-indicator" class="text-center text-gray-500 mb-4 font-medium">1 / 10</p>
+        
+        <!-- Navigation Buttons -->
+        <div class="flex justify-between gap-4">
+            <button id="prev-btn" class="w-full bg-gray-200 text-gray-800 font-semibold px-6 py-3 rounded-lg shadow-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 transition-transform duration-150 active:scale-95">
+                Previous
+            </button>
+            <button id="next-btn" class="w-full bg-indigo-600 text-white font-semibold px-6 py-3 rounded-lg shadow-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-transform duration-150 active:scale-95">
+                Next
+            </button>
+        </div>
+        
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // ---
+            // --- (!!!) INSTRUCTIONS FOR STUDENTS/TEACHER (!!!) ---
+            // ---
+            // To add your own images from Google:
+            // 1. Find an image on Google.
+            // 2. Right-click the image and select "Copy Image Address" or "Copy Image Link".
+            // 3. Paste that link into the `imageUrl` property below, replacing the "https://placehold.co..." link.
+            // ---
+            const animalCards = [
+                { word: 'Lion', imageUrl: 'LION.jpeg' },
+                { word: 'Tiger', imageUrl: 'TIGER.jpeg' },
+                { word: 'Elephant', imageUrl: 'https://placehold.co/400x400/DDE0E3/333?text=Elephant' },
+                { word: 'Giraffe', imageUrl: 'https://placehold.co/400x400/F9E79F/333?text=Giraffe' },
+                { word: 'Zebra', imageUrl: 'https://placehold.co/400x400/FDFEFE/333?text=Zebra' },
+                { word: 'Penguin', imageUrl: 'https://placehold.co/400x400/A9CCE3/333?text=Penguin' },
+                { word: 'Kangaroo', imageUrl: 'https://placehold.co/400x400/D5CBAA/333?text=Kangaroo' },
+                { word: 'Koala', imageUrl: 'https://placehold.co/400x400/CCD1D1/333?text=Koala' },
+                { word: 'Dolphin', imageUrl: 'https://placehold.co/400x400/A9DFBF/333?text=Dolphin' },
+                { word: 'Octopus', imageUrl: 'https://placehold.co/400x400/D2B4DE/333?text=Octopus' }
+            ];
+
+            // --- DOM Elements ---
+            const flashcard = document.getElementById('flashcard');
+            const cardImage = document.getElementById('card-image');
+            const cardWord = document.getElementById('card-word');
+            const prevBtn = document.getElementById('prev-btn');
+            const nextBtn = document.getElementById('next-btn');
+            const progressIndicator = document.getElementById('progress-indicator');
+            const speakBtn = document.getElementById('speak-btn'); // <-- Added
+
+            // --- Game State ---
+            let currentCardIndex = 0;
+            let isFlipped = false;
+
+            /**
+             * Loads a card's data into the UI.
+             */
+            function loadCard(index) {
+                if (index < 0 || index >= animalCards.length) return;
+
+                const cardData = animalCards[index];
+                cardImage.src = cardData.imageUrl;
+                cardImage.alt = `Picture of a ${cardData.word}`;
+                cardWord.textContent = cardData.word;
+                
+                // Update progress text
+                progressIndicator.textContent = `${index + 1} / ${animalCards.length}`;
+                
+                // Reset flip state
+                if (isFlipped) {
+                    flashcard.classList.remove('is-flipped');
+                    isFlipped = false;
+                }
+                
+                // Update button states
+                prevBtn.disabled = (index === 0);
+                nextBtn.disabled = (index === animalCards.length - 1);
+            }
+
+            /**
+             * Flips the card over.
+             */
+            function flipCard() {
+                isFlipped = !isFlipped;
+                flashcard.classList.toggle('is-flipped');
+            }
+
+            /**
+             * Speaks the given text using browser's TTS.
+             */
+            function speak(text) {
+                if (!('speechSynthesis' in window)) {
+                    console.error("Speech synthesis not supported in this browser.");
+                    return;
+                }
+                
+                // Cancel any previous speech to avoid queueing
+                window.speechSynthesis.cancel();
+                
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'en-US'; // Use US English voice
+                utterance.rate = 1.0;
+                utterance.pitch = 1.0;
+                window.speechSynthesis.speak(utterance);
+            }
+
+            // --- Event Listeners ---
+
+            // Click the card to flip
+            flashcard.addEventListener('click', flipCard);
+
+            // "Speak" button
+            speakBtn.addEventListener('click', (event) => {
+                // Stop the click from bubbling up to the card
+                // and causing it to flip back over
+                event.stopPropagation();
+                
+                const wordToSpeak = cardWord.textContent;
+                speak(wordToSpeak);
+            });
+
+            // "Previous" button
+            prevBtn.addEventListener('click', () => {
+                if (currentCardIndex > 0) {
+                    currentCardIndex--;
+                    loadCard(currentCardIndex);
+                }
+            });
+
+            // "Next" button
+            nextBtn.addEventListener('click', () => {
+                if (currentCardIndex < animalCards.length - 1) {
+                    currentCardIndex++;
+                    loadCard(currentCardIndex);
+                }
+            });
+            
+            // --- Initial Game Start ---
+            loadCard(currentCardIndex); // Load the first card
+        });
+    </script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
